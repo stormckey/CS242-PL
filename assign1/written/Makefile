@@ -1,7 +1,7 @@
 TEX := pdflatex
 FLAGS := -shell-escape
 
-all: assign1.pdf
+all: clean assign1.pdf
 
 %.pdf: %.tex
 	${TEX} ${FLAGS} $^

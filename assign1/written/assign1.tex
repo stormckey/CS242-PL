@@ -30,7 +30,7 @@
 
 \hwtitle
   {Assignment 1}
-  {Will Crichton (wcrichto)} %% REPLACE THIS WITH YOUR NAME/ID
+  {Stormckey} %% REPLACE THIS WITH YOUR NAME/ID
 
 \problem{Problem 1}
 
@@ -38,10 +38,26 @@ Part 1:
 
 \begin{alignat*}{1}
 \msf{Property}~p ::= \qamp \varepsilon \\
-\mid \qamp \ldots \\
+\mid \qamp np \\
+\mid \qamp sp \\
 \\
-\msf{Schema}~\tau ::= \qamp \tnum \prop{p} \\
-\mid \qamp \ldots
+\msf{Numerical\ Property}~np ::= \qamp = n \\
+\mid \qamp > n \\
+\mid \qamp < n \\
+\mid \qamp np \wedge np \\
+\mid \qamp np \vee np \\
+\mid \qamp (np) \\
+\\
+\msf{String\ Property}~sp ::= \qamp = s \\
+\mid \qamp sp \vee sp \\
+\\
+\msf{Schema}~\tau ::= \qamp \tnum \prop{np} \\
+\mid \qamp \tnum \prop{\varepsilon} \\
+\mid \qamp \tstr \prop{sp} \\
+\mid \qamp \tstr \prop{\varepsilon} \\
+\mid \qamp \tbool \\
+\mid \qamp [\tau^*] \\
+\mid \qamp \{(s:\tau)^*\} \\
 \end{alignat*}
 
 Part 2:
@@ -55,9 +71,33 @@ Part 2:
 
 \ir{S-Bool-True}{\ }{\matches{\truet}{\tbool}}
 
-% Inference rules go here
+\ir{S-Num}{\ }{\matches{n}{\tnum \prop{\varepsilon}}}
 
+\ir{S-Num-Equal}{n1 = n2 }{\matches{n_1}{\tnum \prop{= n_2}}}
+
+\ir{S-Num-Less}{n_1 < n_2}{\matches{n_1}{\tnum \prop{< n_2}}}
+
+\ir{S-Num-Greater}{n_1 > n_2}{\matches{n_1}{\tnum \prop{> n_2}}}
+
+\ir{S-Num-And}{\matches{n}{\tnum \prop{p}} , \matches{n}{\tnum \prop{q}}}{\matches{n}{\tnum \prop{p \wedge q}}}
+
+\ir{S-Num-Or}{\matches{n}{\tnum \prop{p}} \vee \matches{n}{\tnum \prop{q}}}{\matches{n}{\tnum \prop{p \vee q}}}
+
+\ir{S-Num-Brackets}{\matches{n}{\tnum \prop{p}}}{\matches{n}{\tnum \prop{(p)}}}
+
+\ir{S-Str}{\ }{\matches{s}{\tstr \prop{\varepsilon}}}
+
+\ir{S-Str-Equal}{s_1 = s_2}{\matches{s_1}{\tstr \prop{= s_2}}}
+
+\ir{S-Str-Or}{\matches{s}{\tstr \prop{p}} \vee \matches{s}{\tstr \prop{q}}}{\matches{s}{\tstr \prop{p \vee q}}}
+
+\ir{S-Array}{\forall i = 0 \ldots |j| -1. \matches{a_i}{\tau_i}}{\matches{[a^*]}{[\tau^*]}}
+
+\ir{S-Dict}{\forall s' \in s. \matches{j_{s'}}{\tau_{s'}}}{\matches{\{(s : j)^*\}}{\{(s : \tau)^*\}}}
+
+% Inference rules go here
 \end{mathpar}
+
 
 \problem{Problem 2}
 
@@ -65,18 +105,45 @@ Part 1:
 
 \begin{mathpar}
 % Inference rules go here
+\ir{E-Access}{s' \in s}{\steps{(.s'a,\{(s,j)^*\})}{(a,j_{s'})}}
+
+\ir{E-Index}{i \in \{0 \ldots |j| - 1\}}{\steps{([i]a,[j^*])}{(a,j_i)}}
+
+\ir{E-Map-Access}{\forall i= 1 \ldots |[\{s,j\}^*]|-1, s'\in s_i}{\steps{(|.s'a,[\{s,j\}^*])}{[j_{i,s'}]}}
+
+\ir{E-Map-Index}{\forall l = 1 \ldots |[[j^*]^*]|-1,i \in {0,\ldots,|j_l|-1}}{\steps{(|[i]a,[[j^*]^*])}{[j_{l,i}^*]}}
 \end{mathpar}
 
 Part 2:
 
 \begin{mathpar}
 % Inference rules go here
+\ir{V-Non}{\ }{\matches{\varepsilon}{\tau}} 
+
+\ir{V-Access}{s' \in s, \matches{a}{\tau_{j_{s'}}}}{\matches{.s' a}{\{(s,j)^*\}}}
+
+\ir{V-Index}{i \in \{0 \ldots |j| - 1\}, \matches{a}{\tau_{j_i}}}{\matches{[i]a}{[j^*]}}
+
+\ir{V-Map-Access}{\forall i= 1 \ldots |[\{s,j\}^*]|-1, s'\in s_i, \matches{a}{\tau_{j_{i,s'}}}}{\matches{.|s'a}{[\{s,j\}^*]}}
+
+\ir{V-Map-Index}{\forall l = 1 \ldots |[[j^*]^*]|-1,i \in {0,\ldots,|j_l|-1}, \matches{a}{\tau_{j_{l,i}}}}{\matches{|[i]a}{[[j^*]^*]}}
 \end{mathpar}
 
 \textit{Accessor safety}: for all $a, j, \tau$, if $\matches{a}{\tau}$ and $\matches{j}{\tau}$, then there exists a $j'$ such that $\evals{(a, j)}{\aeps, j'}$.
 
 \begin{proof}
 % Proof goes here.
+Induction on the steps of derivation:
+
+(1 step derivation)
+
+trivial by case analysis of a.
+
+(k step derivation, k > 1)
+
+take 1 step like we did above then use the k-1 hypothesis.
+
+
 \end{proof}
 
 \end{document}
